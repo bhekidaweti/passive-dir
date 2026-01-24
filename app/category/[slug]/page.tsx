@@ -76,6 +76,7 @@ export default async function CategoryPage({ params }: Props) {
         {listings.map((listing) => (
           <ListingCard
             key={listing.id}
+            id={listing.id}
             name={listing.listing_name}
             description={listing.short_description}
             category={listing.primary_category}
