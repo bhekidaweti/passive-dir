@@ -1,51 +1,55 @@
 import { supabase } from "@/lib/supabase"
 import ListingCard from "@/components/ListingCard"
 import { notFound } from "next/navigation"
-
-
-export async function generateStaticParams() {
-  const { data } = await supabase
-    .from("listings")
-    .select("primary_category")
-
-  const uniqueCategories = Array.from(
-    new Set(data?.map(item => item.primary_category))
-  )
-
-  return uniqueCategories.map((category) => ({
-    slug: category
-      .toLowerCase()
-      .replace(/&/g, "and")
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/(^-|-$)/g, "")
-  }))
-}
-
+import { slugify } from "@/lib/slugify"
 
 type Props = {
   params: { slug: string }
 }
 
-function slugToCategory(slug: string) {
-  return slug
-    .split("-")
-    .map(word => word[0].toUpperCase() + word.slice(1))
-    .join(" ")
+//
+// STATIC PARAMS (build time)
+//
+export async function generateStaticParams() {
+  const { data } = await supabase
+    .from("listings")
+    .select("primary_category")
+
+  const unique = Array.from(
+  new Set(data?.map((i) => i.primary_category))
+)
+
+
+  return unique.map((category) => ({
+    slug: slugify(category),
+  }))
 }
 
+//
+// SEO METADATA
+//
 export async function generateMetadata({ params }: Props) {
-  const categoryName = slugToCategory(params.slug)
+  const { data } = await supabase
+    .from("listings")
+    .select("primary_category")
+
+  const match = data?.find(
+    (c) => slugify(c.primary_category) === params.slug
+  )
+
+  const categoryName = match?.primary_category || "Passive Income"
 
   return {
-    title: `${categoryName} Passive Income Apps`,
-    description: `Best ${categoryName.toLowerCase()} platforms to earn passive income online.`
+    title: `${categoryName} Apps & Websites`,
+    description: `Best ${categoryName.toLowerCase()} platforms ranked by risk and earning potential.`,
   }
 }
 
+//
+// PAGE
+//
 export default async function CategoryPage({ params }: Props) {
-  const categoryName = slugToCategory(params.slug)
-
-  const { data: listings } = await supabase
+  const { data } = await supabase
     .from("listings")
     .select(`
       id,
@@ -53,14 +57,19 @@ export default async function CategoryPage({ params }: Props) {
       short_description,
       primary_category,
       risk_ban_probability,
-      website
+      website,
+      acceptance_score
     `)
-    .eq("primary_category", categoryName)
     .order("acceptance_score", { ascending: false })
 
-  if (!listings || listings.length === 0) {
-    return notFound()
-  }
+  const listings =
+    data?.filter(
+      (l) => slugify(l.primary_category) === params.slug
+    ) || []
+
+  if (!listings.length) return notFound()
+
+  const categoryName = listings[0].primary_category
 
   return (
     <main className="mx-auto max-w-7xl px-6 py-12">
@@ -68,8 +77,9 @@ export default async function CategoryPage({ params }: Props) {
         {categoryName} Passive Income Apps
       </h1>
 
-      <p className="mt-4 text-gray-600 max-w-3xl">
-        Curated {categoryName.toLowerCase()} platforms ranked by trust, risk, and earning potential.
+      <p className="mt-4 max-w-3xl text-gray-600">
+        Curated {categoryName.toLowerCase()} platforms ranked by trust,
+        risk, and earning potential.
       </p>
 
       <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
