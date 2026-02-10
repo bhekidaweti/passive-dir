@@ -1,19 +1,27 @@
-export function getRiskLevel(score: number | null) {
-  if (score === null) {
-    return {
-      label: "Not rated",
-      color: "gray",
-      description: "Risk level not yet assessed"
-    }
-  }
+import { supabase } from "./supabase"
 
-  if (score <= 30) {
-    return { label: "Low", color: "green" }
-  }
+export type RiskLevel = {
+  label: string
+  min_score: number
+  max_score: number
+  color: string
+}
 
-  if (score <= 70) {
-    return { label: "Medium", color: "yellow" }
-  }
+export async function getRiskLevels(): Promise<RiskLevel[]> {
+  const { data } = await supabase
+    .from("risk_levels")
+    .select("*")
 
-  return { label: "High", color: "red" }
+  return data || []
+}
+
+export function findRiskBadge(
+  score: number | null,
+  levels: RiskLevel[]
+) {
+  if (score == null) return null
+
+  return levels.find(
+    (r) => score >= r.min_score && score <= r.max_score
+  )
 }

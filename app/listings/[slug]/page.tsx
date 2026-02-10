@@ -2,6 +2,7 @@ import { supabase } from "@/lib/supabase"
 import { slugify } from "@/lib/slugify"
 import { notFound } from "next/navigation"
 
+
 export default async function ListingPage({
   params,
 }: {
@@ -16,6 +17,8 @@ export default async function ListingPage({
   )
 
   if (!listing) return notFound()
+
+  const slug = slugify(listing.listing_name)
 
   return (
     <div className="mx-auto max-w-3xl px-6 py-12">
@@ -54,7 +57,7 @@ export default async function ListingPage({
       </div>
 
       <a
-        href={listing.website}
+        href={`/out/${slug}`}
         target="_blank"
         rel="nofollow sponsored"
         className="mt-8 inline-block rounded-md bg-black px-6 py-3 text-sm text-white"
@@ -64,3 +67,4 @@ export default async function ListingPage({
     </div>
   )
 }
+      
