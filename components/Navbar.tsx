@@ -17,7 +17,10 @@ export default function Navbar() {
     <header className="border-b">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
         <a href="/" className="text-xl font-bold">
-          PassiveIn.com
+          <img
+          src="/passive-logo.png"
+          width={150}
+          />
         </a>
 
         <form
@@ -40,7 +43,10 @@ export default function Navbar() {
         </form>
 
         <nav className="hidden gap-6 md:flex">
-          <a href="/categories" className="text-sm hover:underline">
+           <a href="/compare" className="text-sm hover:underline">
+            Compare programs
+          </a>
+          <a href="/category" className="text-sm hover:underline">
             Categories
           </a>
           <a href="/listings" className="text-sm hover:underline">

@@ -1,5 +1,6 @@
 import { supabase } from "@/lib/supabase"
 import ListingCard from "@/components/ListingCard"
+import { slugify } from "@/lib/slugify"
 
 type SearchParams = {
   risk?: string
@@ -17,6 +18,7 @@ export default async function ListingsPage({
       id,
       listing_name,
       short_description,
+      long_description,
       primary_category,
       risk_ban_probability,
       website
@@ -73,10 +75,12 @@ export default async function ListingsPage({
       <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {listings?.map((listing) => (
           <ListingCard
+            slug={slugify(listing.listing_name)}
             key={listing.id}
             id={listing.id}
             name={listing.listing_name}
             description={listing.short_description}
+            longDescription={listing.long_description}
             category={listing.primary_category}
             risk={listing.risk_ban_probability}
             website={listing.website}

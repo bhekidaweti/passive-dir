@@ -21,10 +21,10 @@ export async function GET(
   }
 
   // increment clicks
-  await supabase
-    .from("outbound_links")
-    .update({ clicks: (data.clicks || 0) + 1 })
-    .eq("slug", params.slug)
+  await supabase.from("click_events").insert({
+  slug: params.slug,
+})
+
 
   const url =
     data.affiliate_url || data.destination_url

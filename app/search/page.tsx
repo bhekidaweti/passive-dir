@@ -25,13 +25,13 @@ export default async function SearchPage({
       <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {data?.map((listing) => (
           <ListingCard
+            longDescription={listing.long_description}
             key={listing.id}
             name={listing.listing_name}
             description={listing.short_description}
             category={listing.primary_category}
             risk={listing.risk_ban_probability}
-            website={listing.website}
-          />
+            website={listing.website} id={""} slug={""}          />
         ))}
       </div>
     </div>

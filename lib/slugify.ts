@@ -1,7 +1,13 @@
-export function slugify(text: string) {
+export function slugify(text: string): string {
+  if (!text) return ""
+
   return text
     .toLowerCase()
-    .replace(/^\d+\s*/, "")
+    .normalize("NFKD") // safe unicode
+    .replace(/&/g, " and ")
+    .replace(/\./g, " ")
     .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)/g, "")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "")
 }
+

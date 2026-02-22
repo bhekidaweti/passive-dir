@@ -3,6 +3,7 @@ export default function ListingCard({
   id,
   name,
   description,
+  longDescription,
   category,
   risk,
   website,
@@ -10,6 +11,7 @@ export default function ListingCard({
   riskColor,
   slug,
 }: {
+  longDescription?: string
   id: string
   name: string
   description: string

@@ -1,89 +1,66 @@
 import { supabase } from "@/lib/supabase"
-import { slugify } from "@/lib/slugify"
 import { notFound } from "next/navigation"
+import Link from "next/link"
+import { slugify } from "@/lib/slugify"
 
-import ListingCard from "@/components/ListingCard"
-import RiskFilter from "@/components/RiskFilter"
-import { getRiskLevels, findRiskBadge } from "@/lib/risk"
+export const dynamic = "force-dynamic"
 
-type Props = {
-  params: { slug: string }
-  searchParams: { risk?: string }
-}
-
-export default async function CategoryPage({
+export default async function CategoryListingsPage({
   params,
-  searchParams,
-}: Props) {
-  const selectedRisk = searchParams?.risk || "all"
+}: {
+  params: { slug: string }
+}) {
 
-  // fetch all listings
-  const { data } = await supabase
+  const cleanSlug = slugify(params.slug)
+
+  const { data: category } = await supabase
+    .from("categories")
+    .select("id, name, slug")
+    .eq("slug", cleanSlug)
+    .single()
+
+  if (!category) return notFound()
+
+
+  const { data: listings } = await supabase
     .from("listings")
-    .select("*")
+    .select(`
+      id,
+      listing_name,
+      short_description,
+      slug
+    `)
+    .eq("category_id", category.id)
 
-  const listings =
-    data?.filter(
-      (l) => slugify(l.primary_category) === params.slug
-    ) || []
-
-  if (!listings.length) return notFound()
-
-  const riskLevels = await getRiskLevels()
-
-  // filter by risk
-  let filtered = listings
-
-  if (selectedRisk !== "all") {
-    const level = riskLevels.find(
-      (r) => r.label.toLowerCase() === selectedRisk
-    )
-
-    if (level) {
-      filtered = listings.filter(
-        (l) =>
-          l.risk_ban_probability >= level.min_score &&
-          l.risk_ban_probability <= level.max_score
-      )
-    }
-  }
-
-  const categoryName = listings[0].primary_category
 
   return (
-    <main className="mx-auto max-w-7xl px-6 py-12">
+    <div className="mx-auto max-w-6xl px-6 py-12">
 
-      <h1 className="text-3xl font-bold">
-        {categoryName} Apps
+      <h1 className="text-3xl font-bold mb-8">
+        {category.name}
       </h1>
 
-      {/* FILTERS */}
-      <RiskFilter current={selectedRisk} />
+      {!listings?.length && (
+        <p className="text-gray-500">No listings yet.</p>
+      )}
 
-      {/* CARDS */}
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {filtered.map((listing) => {
-          const badge = findRiskBadge(
-            listing.risk_ban_probability,
-            riskLevels
-          )
+      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {listings?.map((listing) => (
+          <Link
+            key={listing.id}
+            href={`/listings/${listing.slug}`}
+            className="rounded-xl border p-6 hover:bg-gray-50 transition"
+          >
+            <h2 className="font-semibold">
+              {listing.listing_name}
+            </h2>
 
-          return (
-            <ListingCard
-              key={listing.id}
-              id={listing.id}
-              name={listing.listing_name}
-              description={listing.short_description}
-              category={listing.primary_category}
-              risk={listing.risk_ban_probability}
-              website={listing.website}
-              riskLabel={badge?.label}
-              riskColor={badge?.color}
-              slug={slugify(listing.listing_name)}
-            />
-          )
-        })}
+            <p className="text-sm text-gray-600 mt-2 line-clamp-3">
+              {listing.short_description}
+            </p>
+          </Link>
+        ))}
       </div>
-    </main>
+    </div>
   )
 }
