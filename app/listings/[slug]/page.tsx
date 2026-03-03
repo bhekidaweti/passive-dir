@@ -39,6 +39,11 @@ export default async function ListingPage({
 
       <h2 className="text-xl font-semibold mt-4">{listing.short_description}</h2>
 
+      <p className="mt-4">{listing.long_description}</p>
+
+      <h2 className="text-lg font-semibold mt-6">How you earn passive income with {listing.listing_name}</h2>
+      <p className="mt-2">{listing.how_you_earn_passive_income}</p>
+
       <a 
         href={`/out/${listing.slug}`}
         target="_blank"
